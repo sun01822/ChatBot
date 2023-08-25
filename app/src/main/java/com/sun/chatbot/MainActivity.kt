@@ -1,7 +1,10 @@
 package com.sun.chatbot
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -10,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sun.chatbot.adapter.MessageRVAdapter
 import com.sun.chatbot.data.ChatMessage
+import com.sun.chatbot.databinding.ActivityMainBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -22,19 +26,29 @@ import java.io.IOException
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-
+    private lateinit var binding : ActivityMainBinding
     private lateinit var chatsRV: RecyclerView
     private lateinit var sendMsgIB: ImageButton
+    private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var userMsgEdt: EditText
     private val USER_KEY = "user"
     private val BOT_KEY = "bot"
     private lateinit var messageModalArrayList: ArrayList<ChatMessage>
     private lateinit var messageRVAdapter: MessageRVAdapter
+    private val REQUEST_CODE_SPEECH_INPUT = 1
     private val client = OkHttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Initialize SpeechRecognizer
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        }
 
         chatsRV = findViewById(R.id.idRVChats)
         sendMsgIB = findViewById(R.id.idIBSend)
@@ -56,6 +70,69 @@ class MainActivity : AppCompatActivity() {
 
             sendMessage(userMessage)
             userMsgEdt.text.clear()
+        }
+
+        binding.idIBVoice.setOnClickListener {
+            // on below line we are calling speech recognizer intent.
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+
+            // on below line we are passing language model
+            // and model free form in our intent
+            intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+
+            // on below line we are passing our
+            // language as a default language.
+            intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE,
+                Locale.getDefault()
+            )
+
+            // on below line we are specifying a prompt
+            // message as speak to text on below line.
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to text")
+
+            // on below line we are specifying a try catch block.
+            // in this block we are calling a start activity
+            // for result method and passing our result code.
+            try {
+                startActivityForResult(intent, REQUEST_CODE_SPEECH_INPUT)
+            } catch (e: Exception) {
+                // on below line we are displaying error message in toast
+                Toast
+                    .makeText(
+                        this@MainActivity, " " + e.message,
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }
+    }
+
+    // on below line we are calling on activity result method.
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // in this method we are checking request
+        // code with our result code.
+        if (requestCode == REQUEST_CODE_SPEECH_INPUT) {
+            // on below line we are checking if result code is ok
+            if (resultCode == RESULT_OK && data != null) {
+
+                // in that case we are extracting the
+                // data from our array list
+                val res: ArrayList<String> =
+                    data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) as ArrayList<String>
+
+                // on below line we are setting data
+                // to our output text view.
+                binding.idEdtMessage.setText(
+                    Objects.requireNonNull(res)[0]
+                )
+            }
         }
     }
 
