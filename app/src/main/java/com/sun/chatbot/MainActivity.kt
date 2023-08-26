@@ -174,7 +174,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     runOnUiThread {
                         messageModalArrayList.add(ChatMessage("No response", BOT_KEY))
                         messageRVAdapter.notifyDataSetChanged()
-                        Toast.makeText(this@MainActivity, "No response from the bot..", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: IOException) {
@@ -182,14 +181,12 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 runOnUiThread {
                     messageModalArrayList.add(ChatMessage("Sorry no response found", BOT_KEY))
                     messageRVAdapter.notifyDataSetChanged()
-                    Toast.makeText(this@MainActivity, "No response from the bot..", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: JSONException) {
                 e.printStackTrace()
                 runOnUiThread {
                     messageModalArrayList.add(ChatMessage("JSON Error", BOT_KEY))
                     messageRVAdapter.notifyDataSetChanged()
-                    Toast.makeText(this@MainActivity, "JSON Error", Toast.LENGTH_SHORT).show()
                 }
             }
         }

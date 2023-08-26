@@ -2,18 +2,23 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
-    android:elevation="20dp"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="16dp"
+    >
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
-        tools:ignore="MissingConstraints">
+        app:cardCornerRadius="15dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:background="#F4F4F4"
@@ -36,7 +41,7 @@
                 android:layout_margin="5dp"
                 android:padding="3dp"
                 android:text="Bot message"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:layout_gravity="center"
                 android:textColor="@color/black"  />
 
