@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -18,14 +20,16 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var binding : ActivityMainBinding
     private lateinit var chatsRV: RecyclerView
     private lateinit var sendMsgIB: ImageButton
@@ -37,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageRVAdapter: MessageRVAdapter
     private val REQUEST_CODE_SPEECH_INPUT = 1
     private val client = OkHttpClient()
+    //Text to Speech
+    private var tts: TextToSpeech? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +61,10 @@ class MainActivity : AppCompatActivity() {
         val linearLayoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         chatsRV.layoutManager = linearLayoutManager
         chatsRV.adapter = messageRVAdapter
+
+        // TextToSpeech(Context: this, OnInitListener: this)
+        tts = TextToSpeech(this, this)
+
 
         sendMsgIB.setOnClickListener {
             val userMessage = userMsgEdt.text.toString()
@@ -154,7 +164,7 @@ class MainActivity : AppCompatActivity() {
                     val responseBody = response.body?.string()
                     val jsonResponse = responseBody?.let { JSONObject(it) }
                     val botResponse = jsonResponse?.optJSONObject("chatbot")?.getString("response")
-
+                    speakMessage(botResponse.toString())
                     runOnUiThread {
                         botResponse?.let { ChatMessage(it, BOT_KEY) }
                             ?.let { messageModalArrayList.add(it) }
@@ -183,5 +193,29 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun speakMessage(speak : String){
+        tts!!.speak(speak, TextToSpeech.QUEUE_FLUSH, null,"")
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = tts!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS","The Language not supported!")
+            }
+        }
+    }
+
+    public override fun onDestroy() {
+        // Shutdown TTS when
+        // activity is destroyed
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
+        super.onDestroy()
     }
 }
