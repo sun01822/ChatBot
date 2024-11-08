@@ -154,8 +154,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 val request = Request.Builder()
                     .url(url)
                     .get()
-                    .addHeader("X-RapidAPI-Key", "4eb9e442d4mshe75760479e178afp17bf9bjsne6494e0da592")
-                    .addHeader("X-RapidAPI-Host", "ai-chatbot.p.rapidapi.com")
+                    .addHeader("X-RapidAPI-Key", "") // add API-Key
+                    .addHeader("X-RapidAPI-Host", "") // add API-host
                     .build()
 
                 val response = client.newCall(request).execute()
